@@ -268,7 +268,7 @@ const readFileOptsDefaults: IReadFileOptions = {
 const getReadFileOptions = optsGenerator<IReadFileOptions>(readFileOptsDefaults);
 
 // Options for `fs.writeFile` and `fs.writeFileSync`
-export interface IWriteFileOptions extends IFileOptions {}
+export interface IWriteFileOptions extends IFileOptions { }
 const writeFileDefaults: IWriteFileOptions = {
   encoding: 'utf8',
   mode: MODE.DEFAULT,
@@ -277,7 +277,7 @@ const writeFileDefaults: IWriteFileOptions = {
 const getWriteFileOptions = optsGenerator<IWriteFileOptions>(writeFileDefaults);
 
 // Options for `fs.appendFile` and `fs.appendFileSync`
-export interface IAppendFileOptions extends IFileOptions {}
+export interface IAppendFileOptions extends IFileOptions { }
 const appendFileDefaults: IAppendFileOptions = {
   encoding: 'utf8',
   mode: MODE.DEFAULT,
@@ -617,6 +617,9 @@ export class Volume {
   // Current number of open files.
   openFiles = 0;
 
+
+  caseSensitive: boolean;
+
   StatWatcher: new () => StatWatcher;
   ReadStream: new (...args) => IReadStream;
   WriteStream: new (...args) => IWriteStream;
@@ -635,8 +638,10 @@ export class Volume {
     return this.promisesApi;
   }
 
-  constructor(props = {}) {
+  constructor(props = {}, caseSensitive = true) {
     this.props = Object.assign({ Node, Link, File }, props);
+
+    this.caseSensitive = caseSensitive;
 
     const root = this.createLink();
     root.setNode(this.createNode(true));
@@ -2377,7 +2382,7 @@ export class StatWatcher extends EventEmitter {
 // ---------------------------------------- ReadStream
 
 export interface IReadStream extends Readable {
-  new (path: PathLike, options: IReadStreamOptions);
+  new(path: PathLike, options: IReadStreamOptions);
   open();
   close(callback: TCallback<void>);
   bytesRead: number;
@@ -2557,7 +2562,7 @@ function closeOnOpen(fd) {
 export interface IWriteStream extends Writable {
   bytesWritten: number;
   path: string;
-  new (path: PathLike, options: IWriteStreamOptions);
+  new(path: PathLike, options: IWriteStreamOptions);
   open();
   close();
 }

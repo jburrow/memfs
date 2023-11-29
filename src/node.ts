@@ -371,7 +371,7 @@ export class Link extends EventEmitter {
   }
 
   setChild(name: string, link: Link = new Link(this.vol, this, name)): Link {
-    this.children[name] = link;
+    this.children[this.vol.caseSensitive ? name : name.toLowerCase()] = link;
     link.parent = this;
     this.length++;
 
@@ -393,7 +393,7 @@ export class Link extends EventEmitter {
       delete link.children['..'];
       this.getNode().nlink--;
     }
-    delete this.children[link.getName()];
+    delete this.children[this.vol.caseSensitive ? link.getName() : link.getName().toLowerCase()];
     this.length--;
 
     this.getNode().mtime = new Date();
@@ -401,10 +401,9 @@ export class Link extends EventEmitter {
   }
 
   getChild(name: string): Link | undefined {
+    const tmp = !this.vol.caseSensitive ? name = name.toLowerCase() : name;
     this.getNode().mtime = new Date();
-    if (Object.hasOwnProperty.call(this.children, name)) {
-      return this.children[name];
-    }
+    return this.children[tmp];
   }
 
   getPath(): string {
@@ -531,7 +530,7 @@ export class File {
     return Stats.build(this.node) as Stats<number>;
   }
 
-  write(buf: Buffer, offset: number = 0, length: number = buf.length, position?: number): number {
+  write(buf: Buffer, offset: number = 0, length: number = buf.length, position?: number | null): number {
     if (typeof position !== 'number') position = this.position;
     const bytes = this.node.write(buf, offset, length, position);
     this.position = position + bytes;
